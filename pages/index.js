@@ -63,12 +63,16 @@ export default function Home() {
 				/>
 				<Text 
 					position={[0,45,0]} 
-					text={"You can do this!"}
+					text={"You can do this Ellese!"}
 				/>
 				<Model position={[0,-25,0]} scale={0.35}/>
 				<Text 
 					position={[0,-40,0]} 
 					text={"I believe in YOU"}
+				/>
+				<Text 
+					position={[0,-50,0]} 
+					text={"- Gian"}
 				/>
 			</Canvas>
 		</div>	
