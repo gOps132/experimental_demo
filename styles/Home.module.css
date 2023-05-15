@@ -1,0 +1,12 @@
+.scene{
+	width: 100vw;
+	height: 100vh;
+}
+
+.canvas{
+	position: fixed;
+	top: 0;
+	left: 0;
+	/* background: #000000; */
+	background: rgb(38, 32, 32);
+}
