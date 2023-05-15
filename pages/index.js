@@ -7,7 +7,6 @@ import OrbitControls from "../components/orbit_controls";
 
 import Star from "../components/star";
 
-// import Model from "../components/Scene";
 import Model from "../components/Glasses";
 
 import Text from "../components/text";
@@ -37,7 +36,7 @@ export default function Home() {
 				<hemisphereLight
 					skyColor={0xffffff}
 					groundColor={0x444444}
-					intensity={1.5}
+					intensity={1}
 					position={[-50,200,100]}
 				/>
 				{/* <ambientLight 
@@ -59,7 +58,7 @@ export default function Home() {
 				/> */}
 				<directionalLight 
 					color={0xffffff}
-					intensity={1}
+					intensity={0.5}
 					position={[-50,200,200]}
 				/>
 				<Text 
