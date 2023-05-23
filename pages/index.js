@@ -1,20 +1,20 @@
 import { use, useEffect, useState } from "react";
 
-import {Canvas, useFrame, useThree} from "@react-three/fiber";
-import styles from "../styles/Home.module.css";
+import {Canvas, extend, useFrame, useThree} from "@react-three/fiber";
+import styles from "@/styles/Home.module.css";
 
-import OrbitControls from "../components/orbit_controls";
+import OrbitControls from "@/components/orbit_controls";
 
-import Text from "../components/text";
+import { GrassFieldInstance } from "@/components/grass";
 
-export default function Home() {
+export default function Home() {	
 	return (
 		<div className={styles.scene}>
 			<Canvas
 				shadows
 				className={styles.canvas}
 				camera={{
-					position: [0, 0, 100]
+					position: [0, 0, 30]
 				}}
 			>
 				<OrbitControls
@@ -26,6 +26,9 @@ export default function Home() {
 					maxDistance={1000}
 					minDistance={100}
 				/>
+				<gridHelper args={[10,10]}/>
+				<axesHelper/>
+				<GrassFieldInstance/>
 			</Canvas>
 		</div>	
 	)
