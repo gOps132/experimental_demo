@@ -10,17 +10,25 @@ precision mediump float;
 uniform vec3 color1;
 uniform vec3 color2;
 
-void main() {
-	vec2 st = gl_PointCoord;
-	float mixValue = distance(st, vec2(0, 1));
+uniform sampler2D grassMask;
+uniform sampler2D grassDiffuse;
 
-	vec3 color = mix(color1, color2, mixValue);
-		
-	gl_FragColor = vec4(color, 1);
+varying vec2 vUv;
+
+void main() {
+	// float mixValue = distance(st, vec2(0, 1));
+
+	vec3 maskColor = texture2D(grassMask, vUv).rgb;
+	// vec3 finalColor = mix(color1, color2, mixValue).rgb;
+	vec3 finalColor = texture2D(grassDiffuse, vUv).rgb;
+
+	gl_FragColor = vec4(finalColor, 1);
+	
+	if (maskColor.r <= 0.5) {
+		discard;
+	}
 }
 // */
-
-
 
 /*
 precision mediump float;
