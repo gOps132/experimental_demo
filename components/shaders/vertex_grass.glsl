@@ -5,6 +5,10 @@
 
 // attribute vec3 position;
 
+attribute vec3 terrPosi;
+
 void main() {
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    // vec3 finalPosition = position + vec3(-1.6778351068496704, 0, -1.7341969013214111);
+    vec3 finalPosition = position + terrPosi;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
 }

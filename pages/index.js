@@ -5,7 +5,7 @@ import styles from "@/styles/Home.module.css";
 
 import OrbitControls from "@/components/orbit_controls";
 
-import { GrassFieldInstance } from "@/components/grass";
+import { GrassField } from "@/components/grass";
 
 export default function Home() {	
 	return (
@@ -26,9 +26,8 @@ export default function Home() {
 					maxDistance={1000}
 					minDistance={100}
 				/>
-				<gridHelper args={[10,10]}/>
 				<axesHelper/>
-				<GrassFieldInstance/>
+				<GrassField/>
 			</Canvas>
 		</div>	
 	)
