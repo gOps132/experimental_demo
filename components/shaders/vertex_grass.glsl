@@ -8,7 +8,12 @@
 attribute vec3 terrPosi;
 
 void main() {
-    // vec3 finalPosition = position + vec3(-1.6778351068496704, 0, -1.7341969013214111);
-    vec3 finalPosition = position + terrPosi;
+    vec3 finalPosition = position;
+    finalPosition.x *= 0.1;
+    finalPosition.y += 0.5;
+
+    finalPosition += terrPosi;
+
+    gl_PointSize = 100.0;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
 }

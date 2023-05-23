@@ -5,7 +5,7 @@ import vertexShader from "./shaders/vertex_grass.glsl";
 import fragmentShader from "./shaders/fragment_grass.glsl";
 
 function GrassField() {
-	let instances = 2000;
+	let instances = 1000;
 	let w = 20;
 	let d = 20;
 	let h = 0;
@@ -25,12 +25,38 @@ function GrassField() {
 	let indices = new Uint16Array([0,1,2,2,3,0]);
 
 	let terrain_vertices = [];
-	const uniforms = {}
+	const uniforms = {
+		color1: {
+			value: new THREE.Vector3(0.0, 255.0, 0.0)
+		},
+		color1: {
+			value: new THREE.Vector3(0.0, 5.0, 0.0)
+		}
+	}
+
 
 	for(let i = 0; i < instances; i++) {
-		let x = Math.random() * w - (w/2);
+
+		// let x = Math.random() * w - (w/2);
 		let y = h;
-		let z = Math.random() * d - (d/2);
+		// let z = Math.random() * d - (d/2);
+
+		let r = (w/2) || instances;
+		var a = Math.random(),
+			b = Math.random();
+		
+		if (w/2) {
+			if (b < a) {
+				let c = b;
+				b = a;
+				a = c;
+			}
+		}
+		
+		let x = b * r * Math.cos( 2 * Math.PI * a / b );
+		let z = b * r * Math.sin( 2 * Math.PI * a / b );
+
+		// x = y = z = 0;
 
 		terrain_vertices.push(x,y,z)
 	}
