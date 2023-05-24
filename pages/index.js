@@ -14,7 +14,7 @@ export default function Home() {
 				shadows
 				className={styles.canvas}
 				camera={{
-					position: [0, 0, 30]
+					position: [0, 3, 5]
 				}}
 			>
 				<OrbitControls

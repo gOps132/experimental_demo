@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { useLoader, useFrame } from "@react-three/fiber";
@@ -14,7 +14,7 @@ function GrassField() {
 	const texture = useLoader(TextureLoader, "../textures/grass.jpg");
 	const texture_02 = useLoader(TextureLoader, "../textures/grass_diffuse.jpg");
 
-	let instances = 1000;
+	let instances = 10000;
 	let w = 20;
 	let d = 20;
 	let h = 0;
@@ -36,9 +36,8 @@ function GrassField() {
 	let terrain_vertices = [];
 	let angles = [];
 
-	const uniforms = {
+	const uniforms = useMemo(() => ({
 		u_time : {
-			type: "f",
 			value: 0.0
 		},
 		grassMask: {
@@ -53,13 +52,15 @@ function GrassField() {
 		color1: {
 			value: new THREE.Vector3(0.0, 5.0, 0.0)
 		}
-	}
+	}));
 
-	useFrame(({clock}) => {
-		const time = clock.getElapsedTime();
-		// time.current += 0.03;
-		ref.current.material.uniforms.u_time.value = time;
-		// console.log(ref.current.material.uniforms.u_time.value);
+	useEffect(() => {
+		console.log(ref.current);
+	})
+	useFrame((state) => {
+		const { clock } = state;
+		ref.current.material.uniforms.u_time.value = clock.getElapsedTime();
+		console.log(ref.current.material.uniforms.u_time.value);
 	});
 
 	for(let i = 0; i < instances; i++) {
@@ -93,6 +94,15 @@ function GrassField() {
 	return (
 		<group>
 			<gridHelper args={[w,d]}/>
+			<mesh 
+				rotation={[(Math.PI / 2), 0, 0]}
+			>
+				<planeGeometry args={[w,d]}/> 
+				<meshBasicMaterial
+						color={0x08731f}
+						side={THREE.DoubleSide}
+				/>
+			</mesh>
 			<mesh ref={ref}>
 				<instancedBufferGeometry
 					instanceCount={instances}
