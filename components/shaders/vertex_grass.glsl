@@ -39,8 +39,8 @@ void main() {
 	finalPosition.y += 0.5;
 
 	if(finalPosition.y > 0.5) {
-		finalPosition.x = ( finalPosition.x + sin( u_time/10.0* ( angle*0.02 ) )  * 0.05);
-		finalPosition.z = ( finalPosition.z + cos( u_time/10.0* ( angle*0.02 ) )  * 0.05);	
+		finalPosition.x = ( finalPosition.x + sin( u_time/0.5* ( angle*0.01 ) )  * 0.05);
+		finalPosition.z = ( finalPosition.z + cos( u_time/0.5* ( angle*0.01 ) )  * 0.05);	
 	}
 
 	vec3 axist = vec3(0.0, 1.0, 0.0);
@@ -48,6 +48,6 @@ void main() {
 
 	finalPosition += terrPosi;
 
-	// gl_PointSize = 100.0;
+	gl_PointSize = 100.0;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
 }

@@ -7,20 +7,46 @@ void main() {
 // /*
 precision mediump float;
 
-uniform vec3 color1;
-uniform vec3 color2;
+uniform int u_color1;
+uniform int u_color2;
 
 uniform sampler2D grassMask;
 uniform sampler2D grassDiffuse;
 
 varying vec2 vUv;
 
+float modI(float a, float b);
+
+vec3 convert_color(int r_color) {
+	// float temp = modI(256.0,256.0);
+    float r_int_val = modI(float(r_color / 256 / 256), 256.0);
+    float g_int_val = modI(float(r_color / 256), 256.0);
+    float b_int_val = modI(float(r_color), 256.0);
+
+	return vec3(r_int_val, g_int_val, b_int_val); 
+}
+
+float modI(float a,float b) {
+    float m=a-floor((a+0.5)/b)*b;
+    return floor(m+0.5);
+}
+
 void main() {
-	// float mixValue = distance(st, vec2(0, 1));
+	vec2 st = gl_PointCoord;
+	float mixValue = distance(st, vec2(0, 1));
+
+	vec3 color1 = convert_color(u_color1);
+	vec3 color2 = convert_color(u_color2);
 
 	vec3 maskColor = texture2D(grassMask, vUv).rgb;
-	// vec3 finalColor = mix(color1, color2, mixValue).rgb;
-	vec3 finalColor = texture2D(grassDiffuse, vUv).rgb;
+
+	// vec3 mixColor = color1;
+	vec3 mixColor = mix(color1, color2, mixValue).rgb;
+
+	// vec3 finalColor = texture2D(grassDiffuse, vUv).rgb;
+
+	vec3 diffuseTexture = texture2D(grassDiffuse, vUv).rgb;
+	vec3 finalColor = diffuseTexture * mixColor;
 
 	gl_FragColor = vec4(finalColor, 1);
 	
