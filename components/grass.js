@@ -10,6 +10,8 @@ import { TextureLoader } from "three";
 
 import { useControls } from "leva";
 
+THREE.MeshMatcapMaterial;
+
 function GrassField(props) {
 	const grass_field = useRef();
 	const grass_particles = useRef();
@@ -23,10 +25,10 @@ function GrassField(props) {
 	let h = props.height ?  props.height : 0;
 
 	let vertices = new Float32Array([
-		0.5, -0.5, 0,
-		-0.5, -0.5, 0,
-		-0.5, 0.5, 0,
-		0.5, 0.5, 0
+		1.0, -1.0, 0,
+		-1.0, -1.0, 0,
+		-1.0, 1.0, 0,
+		1.0, 1.0, 0
 	]);
 	let uvs = new Float32Array([
 		1.0, 0.0,
@@ -41,16 +43,16 @@ function GrassField(props) {
 
 
 	const plane_params = useControls("Grass Plane", {
-		color: {value: '#3e5839', onChange: (i) => {
+		color: {value: '#1d5c11', onChange: (i) => {
 			grass_field.current.material.color.set(i)
 		}},
 	});
 
 	const grass_params = useControls("Grass", {
-		color1: {value: '#3d6c34', onChange: (i) => {
+		color1: {value: '#2afc00', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color1.value = new THREE.Color(i);
 		}},
-		color2: {value: '#00FFFF', onChange: (i) => {
+		color2: {value: '#044b00', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color2.value = new THREE.Color(i);
 		}},	
 	});
@@ -91,16 +93,16 @@ function GrassField(props) {
 	for(let i = 0; i < instances; i++) {
 
 		// round 
-		// let r = (w/2) || instances;
-		// var a = Math.random(),
-		// 	b = Math.random();
-		// if (w/2) {
-		// 	if (b < a) {
-		// 		let c = b;
-		// 		b = a;
-		// 		a = c;
-		// 	}
-		// }
+		let r = (w/2) || instances;
+		var a = Math.random(),
+			b = Math.random();
+		if (w/2) {
+			if (b < a) {
+				let c = b;
+				b = a;
+				a = c;
+			}
+		}
 		// let x = b * r * Math.cos( 2 * Math.PI * a / b );
 		// let z = b * r * Math.sin( 2 * Math.PI * a / b );
 
@@ -115,6 +117,13 @@ function GrassField(props) {
 		terrain_vertices.push(x,y,z)
 	}
 
+	useEffect(() => {
+		console.log(uniforms);
+		// console.log(
+		// 	THREE.ShaderChunk.aomap_fragment +
+		// 	THREE.ShaderChunk.aomap_pars_fragment +
+		// 	fragmentShader);
+	})
 	return (
 		<>
 			<group>
@@ -171,8 +180,12 @@ function GrassField(props) {
 					</instancedBufferGeometry>
 					<shaderMaterial
 						uniforms={uniforms}
-						vertexShader={vertexShader}
-						fragmentShader={fragmentShader}
+						vertexShader={
+							vertexShader
+						}
+						fragmentShader={
+							fragmentShader
+						}
 						lights={true}
 						side={THREE.DoubleSide}
 					/>

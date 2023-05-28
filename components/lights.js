@@ -2,7 +2,6 @@ import * as THREE from "three";
 
 import { useEffect, useRef, memo } from "react";
 
-import Model from "./models/Glasses";
 import { useHelper, GizmoHelper, GizmoViewport, AccumulativeShadows, RandomizedLight } from "@react-three/drei";
 import { useControls } from "leva";
 
@@ -12,6 +11,11 @@ function LightExample() {
 
 	useHelper(hemisphere_light, THREE.HemisphereLightHelper, 1, "blue");
 	useHelper(directional_light, THREE.DirectionalLightHelper, 1, "red");
+
+	const ambient_light_params = useControls('ambient light', {
+		intensity: {value: 0.5, min: 0, max: 10, step: 0.01 },
+		color: "#ffffff",
+	});
 
 	const hemisphere_light_params = useControls('hemisphere light', {
 		position: [0, 5, 0],
@@ -27,13 +31,11 @@ function LightExample() {
 		color: '#ffffff'
 	});
 
-	// const plane_params = useControls('plane', {
-	// 	recieveShadow: true,
-	// 	color: '#6f6f6f',
-	// })
-
 	return (
 		<>
+			<ambientLight
+				{...ambient_light_params}
+			/>
 			<hemisphereLight
 				ref={hemisphere_light}
 				{...hemisphere_light_params}
@@ -42,18 +44,6 @@ function LightExample() {
 				ref={directional_light}
 				{...directional_light_params}
 			/>
-			<Model scale={0.05} />
-			{/* <mesh
-				rotation={[(Math.PI / 2), 0, 0]}
-			>
-				<planeGeometry
-					args={[20,20]}
-				/>
-				<meshBasicMaterial
-					{...plane_params}
-					side={THREE.DoubleSide}
-				/>
-			</mesh> */}
 		</>
 	)
 }

@@ -10,6 +10,8 @@ import { useHelper, GizmoHelper, GizmoViewport, AccumulativeShadows, RandomizedL
 import { GrassField } from "@/components/grass";
 import { LightExample } from "@/components/lights";
 
+import Model from "@/components/models/Glasses";
+
 export default function Home() {	
 	return (
 		<div className={styles.scene}>
@@ -17,7 +19,7 @@ export default function Home() {
 				shadows
 				className={styles.canvas}
 				camera={{
-					// position: [0, 3, 5]
+					position: [0, 3, 15]
 				}}
 			>
 				<OrbitControls
@@ -30,14 +32,16 @@ export default function Home() {
 					minDistance={100}
 				/>
 				<axesHelper/>
-				
+
+				<Model scale={0.05} />
+
 				<GrassField
-					instances={10000}
-					width={20}
-					dimension={20}
+					instances={20000}
+					width={50}
+					dimension={50}
 					height={0}
 				/>
-
+				
 				<LightExample/>
 
 				{/* add drei grid here as well */}

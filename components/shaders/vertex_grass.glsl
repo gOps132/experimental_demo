@@ -35,8 +35,15 @@ void main() {
 
 	vec3 finalPosition = position;
 	finalPosition.x *= 0.7 * cos(uv.x);
+
+	/* TODO:
+		add noise to height of each grass from += -0.5
+		to += 1.5 for more variety
+	*/
+
 	// finalPosition.x *= 0.7;
-	finalPosition.y += 0.5;
+
+	finalPosition.y += 1.0;
 
 	if(finalPosition.y > 0.5) {
 		finalPosition.x = ( finalPosition.x + sin( u_time/0.5* ( angle*0.01 ) )  * 0.05);
@@ -48,6 +55,6 @@ void main() {
 
 	finalPosition += terrPosi;
 
-	gl_PointSize = 100.0;
+	gl_PointSize = 1000.0;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
 }
