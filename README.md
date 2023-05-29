@@ -1,5 +1,5 @@
-# Shaders and stuff project
-# please be more creative dude - Me to Me
+# Gian's demos
 
-## sources
-https://gero3.github.io/facetype.js/
+* Grass
+    - just a grass plane
+# please be more creative dude - Me to Me
