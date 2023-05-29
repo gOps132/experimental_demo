@@ -55,7 +55,7 @@ function GrassField(props) {
 	});
 
 	const grass_params = useControls("Grass", {
-		color1: {value: '#70cb5e', onChange: (i) => {
+		color1: {value: '#4b933d', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color1.value = new THREE.Color(i);
 		}},
 		color2: {value: '#000000', onChange: (i) => {
