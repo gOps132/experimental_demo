@@ -1,3 +1,8 @@
+// really helps
+// https://www.youtube.com/watch?v=e-lnyzN2wrM
+
+// from: http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
+
 precision mediump float;
 
 uniform vec3 u_color1;
@@ -8,9 +13,17 @@ uniform sampler2D grassDiffuse;
 
 varying vec2 vUv;
 
-uniform vec3 ambientLightColor;
+varying vec3 v_normal;
 
-// from: http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
+uniform vec3 ambientLightColor;
+#if NUM_DIR_LIGHTS > 0
+	struct DirectionalLight {
+		vec3 direction;
+		vec3 color;
+	};
+
+	uniform DirectionalLight directionalLights[ NUM_DIR_LIGHTS ];
+#endif
 
 vec3 rgb2hsv(vec3 c) {
 	vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -39,15 +52,27 @@ void main() {
 	vec3 hsv2 = rgb2hsv(u_color2);
 	
 	// mix hue in toward closest direction
-	float hue = (mod(mod((hsv2.x - hsv1.x), 1.) + 1.5, 1.) - 0.5) * mixValue + hsv1.x;
-	vec3 hsv = vec3(hue, mix(hsv1.yz, hsv2.yz, mixValue));
+	float hue = (mod(mod((hsv2.x - hsv1.x), 1.) + 1.5, 1.) - 0.5) * vUv.y + hsv1.x;
+	vec3 hsv = vec3(hue, mix(hsv2.yz, hsv1.yz, vUv.y));
 	
-	vec3 color = hsv2rgb(hsv);
+	vec3 mixed_color = hsv2rgb(hsv);
 
-	// gl_FragColor = vec4((color * diffuseTexture), 1);
-	gl_FragColor = vec4((color * diffuseTexture) * ambientLightColor, 1);
-	// gl_FragColor = vec4(color * ambientLightColor, 1);
-	// gl_FragColor = vec4(color, 1);
+	// vec3 mixed_color = mix(u_color2, u_color1, vUv.y);
+
+	// lambert rule, gives cosine
+	float diffuse_factor = dot(normalize(v_normal), -directionalLights[0].direction);
+	vec3 diffuse_color = directionalLights[0].color;
+
+	if (diffuse_factor > 0.0) {
+		diffuse_color = 
+			diffuse_color * diffuse_factor;
+	}
+
+	gl_FragColor = vec4(
+		// (mixed_color * diffuseTexture) 
+		mixed_color 
+		* (ambientLightColor + diffuse_color),
+		1);
 
 	if (maskColor.r <= 0.5) {
 		discard;

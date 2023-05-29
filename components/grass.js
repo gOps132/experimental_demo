@@ -16,8 +16,13 @@ function GrassField(props) {
 	const grass_field = useRef();
 	const grass_particles = useRef();
 
-	const texture = useLoader(TextureLoader, "../textures/grass.jpg");
-	const texture_02 = useLoader(TextureLoader, "../textures/grass_diffuse.jpg");
+	const grass_texture = useLoader(TextureLoader, "../textures/grass.jpg");
+	const grass_diffuse_texture = useLoader(TextureLoader, "../textures/grass_diffuse.jpg");
+	const dirt_texture = useLoader(TextureLoader, "../textures/dirt.jpg");
+	
+	dirt_texture.wrapS = dirt_texture.wrapT = THREE.RepeatWrapping;
+    dirt_texture.offset.set( 0, 0 );
+    dirt_texture.repeat.set( 20, 20 );
 
 	let instances = props.instances ? props.instances : 10000;
 	let w = props.width ? props.width : 20;
@@ -43,34 +48,58 @@ function GrassField(props) {
 
 
 	const plane_params = useControls("Grass Plane", {
-		color: {value: '#1d5c11', onChange: (i) => {
-			grass_field.current.material.color.set(i)
-		}},
+		// color: {value: '#1d5c11', onChange: (i) => {
+		// 	grass_field.current.material.color.set(i)
+		// }},
+		reflectivity: 10.0,
 	});
 
 	const grass_params = useControls("Grass", {
-		color1: {value: '#2afc00', onChange: (i) => {
+		color1: {value: '#178900', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color1.value = new THREE.Color(i);
 		}},
-		color2: {value: '#044b00', onChange: (i) => {
+		color2: {value: '#011d09', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color2.value = new THREE.Color(i);
+		}},
+		noise_y: {value: 4.0, min: 0.0, max: 10.0, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_noise_y.value = i;
+		}},
+		noise_x: {value: 0.5, min: 0.0, max: 10.0, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_noise_x.value = i;
+		}},	
+		displacement: {value: [0.0,2.0,0.0], step: 0.05, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_displacement.value.x = i[0];
+			grass_particles.current.material.uniforms.u_displacement.value.y = i[1];
+			grass_particles.current.material.uniforms.u_displacement.value.z = i[2];
 		}},	
 	});
 
 	const uniforms = THREE.UniformsUtils.merge([
 		THREE.UniformsLib[ "lights" ],
 		{
+			u_displacement: {
+				type: "f",
+				value: new THREE.Vector3(0)
+			},
 			u_time : {
 				type: "f",
 				value: 0.0
 			},
+			u_noise_y : {
+				type: "f",
+				value: 1.0
+			},
+			u_noise_x : {
+				type: "f",
+				value: 1.0
+			},
 			grassMask: {
 				type: "t",
-				value: texture
+				value: grass_texture
 			},
 			grassDiffuse: {
 				type: "t",
-				value: texture_02
+				value: grass_diffuse_texture
 			},
 			u_color1: {
 				type: "i",
@@ -119,15 +148,10 @@ function GrassField(props) {
 
 	useEffect(() => {
 		console.log(uniforms);
-		// console.log(
-		// 	THREE.ShaderChunk.aomap_fragment +
-		// 	THREE.ShaderChunk.aomap_pars_fragment +
-		// 	fragmentShader);
 	})
 	return (
 		<>
 			<group>
-				{/* <gridHelper args={[w,d]}/> */}
 				<mesh
 					ref={grass_field}
 					rotation={[(Math.PI / 2), 0, 0]}
@@ -135,6 +159,7 @@ function GrassField(props) {
 					<planeGeometry args={[w,d]}/> 
 					<meshBasicMaterial
 						{...plane_params}
+						map={dirt_texture}
 						side={THREE.DoubleSide}
 					/>
 				</mesh>

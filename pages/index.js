@@ -37,11 +37,11 @@ export default function Home() {
 
 				<GrassField
 					instances={20000}
-					width={50}
-					dimension={50}
+					width={100}
+					dimension={100}
 					height={0}
 				/>
-				
+
 				<LightExample/>
 
 				{/* add drei grid here as well */}

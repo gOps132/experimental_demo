@@ -13,7 +13,7 @@ function LightExample() {
 	useHelper(directional_light, THREE.DirectionalLightHelper, 1, "red");
 
 	const ambient_light_params = useControls('ambient light', {
-		intensity: {value: 0.5, min: 0, max: 10, step: 0.01 },
+		intensity: {value: 0.0, min: 0, max: 10, step: 0.01 },
 		color: "#ffffff",
 	});
 
@@ -21,7 +21,6 @@ function LightExample() {
 		position: [0, 5, 0],
 		intensity: { value: 0.5, min: 0, max: 100, step: 0.05 },
 		skyColor: '#ffffff',
-		groundColor: '#444444',
 	});
 
 	const directional_light_params = useControls('directional light', {
