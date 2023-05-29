@@ -55,19 +55,19 @@ function GrassField(props) {
 	});
 
 	const grass_params = useControls("Grass", {
-		color1: {value: '#178900', onChange: (i) => {
+		color1: {value: '#70cb5e', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color1.value = new THREE.Color(i);
 		}},
-		color2: {value: '#011d09', onChange: (i) => {
+		color2: {value: '#000000', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color2.value = new THREE.Color(i);
 		}},
-		noise_y: {value: 4.0, min: 0.0, max: 10.0, onChange: (i) => {
+		noise_y: {value: 3.0, min: 0.0, max: 10.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_noise_y.value = i;
 		}},
 		noise_x: {value: 0.5, min: 0.0, max: 10.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_noise_x.value = i;
 		}},	
-		displacement: {value: [0.0,2.0,0.0], step: 0.05, onChange: (i) => {
+		displacement: {value: [0.0,1.0,0.0], step: 0.05, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_displacement.value.x = i[0];
 			grass_particles.current.material.uniforms.u_displacement.value.y = i[1];
 			grass_particles.current.material.uniforms.u_displacement.value.z = i[2];
