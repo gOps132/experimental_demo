@@ -6,6 +6,8 @@ import { useLoader, useFrame, extend } from "@react-three/fiber";
 import vertexShader from "./shaders/vertex_grass.glsl";
 import fragmentShader from "./shaders/fragment_grass.glsl";
 
+import simplex from "./shaders/simplex.glsl";
+
 import { TextureLoader } from "three";
 
 import { useControls } from "leva";
@@ -30,18 +32,19 @@ function GrassField(props) {
 	let h = props.height ?  props.height : 0;
 
 	let vertices = new Float32Array([
-		1.0, -1.0, 0,
-		-1.0, -1.0, 0,
-		-1.0, 1.0, 0,
-		1.0, 1.0, 0
+		-0.5, -0.5, 0.0,
+		0.0,  0.5, 0.0,
+		0.5,  -0.5, 0.0,
+		// 1.0, -1.0, 0
 	]);
 	let uvs = new Float32Array([
-		1.0, 0.0,
 		0.0, 0.0,
-		0.0, 1.0,
+		1.0, 1.0,
+		1.0, 0.0,
 		1.0, 1.0
 	]);
-	let indices = new Uint16Array([0,1,2,2,3,0]);
+	// let indices = new Uint16Array([0,1,2,2,3,0]);
+	let indices = new Uint16Array([0,1,2]);
 
 	let terrain_vertices = [];
 	let angles = [];
@@ -61,13 +64,13 @@ function GrassField(props) {
 		color2: {value: '#000000', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color2.value = new THREE.Color(i);
 		}},
-		noise_y: {value: 3.0, min: 0.0, max: 10.0, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_noise_y.value = i;
+		posy: {value: 0.5, min: 0.0, max: 10.0, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_posy.value = i;
 		}},
-		noise_x: {value: 0.5, min: 0.0, max: 10.0, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_noise_x.value = i;
+		posx: {value: 3.0, min: 0.0, max: 10.0, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_posx.value = i;
 		}},	
-		displacement: {value: [0.0,1.0,0.0], step: 0.05, onChange: (i) => {
+		displacement: {value: [0.0,0.0,0.0], step: 0.05, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_displacement.value.x = i[0];
 			grass_particles.current.material.uniforms.u_displacement.value.y = i[1];
 			grass_particles.current.material.uniforms.u_displacement.value.z = i[2];
@@ -85,11 +88,11 @@ function GrassField(props) {
 				type: "f",
 				value: 0.0
 			},
-			u_noise_y : {
+			u_posy : {
 				type: "f",
 				value: 1.0
 			},
-			u_noise_x : {
+			u_posx : {
 				type: "f",
 				value: 1.0
 			},
@@ -121,25 +124,33 @@ function GrassField(props) {
 	// grass placement
 	for(let i = 0; i < instances; i++) {
 
+		let x;
+		let z;
+
 		// round 
-		let r = (w/2) || instances;
-		var a = Math.random(),
-			b = Math.random();
-		if (w/2) {
-			if (b < a) {
-				let c = b;
-				b = a;
-				a = c;
+		if(!props.distribute || props.distribute == "square") {
+			// square
+			x = Math.random() * w - (w/2);
+			z = Math.random() * d - (d/2);
+		} else if (props.distribute == "circle") {
+			// round
+			let r = (w/2) || instances;
+			var a = Math.random(),
+				b = Math.random();
+			if (w/2) {
+				if (b < a) {
+					let c = b;
+					b = a;
+					a = c;
+				}
 			}
+			x = b * r * Math.cos( 2 * Math.PI * a / b );
+			z = b * r * Math.sin( 2 * Math.PI * a / b );
 		}
-		// let x = b * r * Math.cos( 2 * Math.PI * a / b );
-		// let z = b * r * Math.sin( 2 * Math.PI * a / b );
 
-		// square
-		let x = Math.random() * w - (w/2);
-		let z = Math.random() * d - (d/2);
-
+		// thats it, noise is here
 		let y = h;
+				
 
 		// x = y = z = 0;
 		angles.push( Math.random()*360 );
@@ -206,6 +217,7 @@ function GrassField(props) {
 					<shaderMaterial
 						uniforms={uniforms}
 						vertexShader={
+							simplex +
 							vertexShader
 						}
 						fragmentShader={

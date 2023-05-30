@@ -5,7 +5,7 @@ import styles from "@/styles/Home.module.css";
 
 import OrbitControls from "@/components/orbit_controls";
 
-import { useHelper, GizmoHelper, GizmoViewport, AccumulativeShadows, RandomizedLight } from "@react-three/drei";
+import { useHelper, GizmoHelper, GizmoViewport, AccumulativeShadows, RandomizedLight, Stats } from "@react-three/drei";
 
 import { GrassField } from "@/components/grass";
 import { LightExample } from "@/components/lights";
@@ -17,11 +17,13 @@ export default function Home() {
 		<div className={styles.scene}>
 			<Canvas
 				shadows
+				// orthographic
 				className={styles.canvas}
 				camera={{
 					position: [0, 8, 15]
 				}}
 			>
+				<Stats/>
 				<OrbitControls
 					autoRotate={false}
 					enableDamping={true}
@@ -36,9 +38,10 @@ export default function Home() {
 				<Model scale={0.05} />
 
 				<GrassField
-					instances={20000}
-					width={100}
-					dimension={100}
+					distribute={"square"}
+					instances={50}
+					width={6}
+					dimension={6}
 					height={0}
 				/>
 

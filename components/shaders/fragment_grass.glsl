@@ -8,9 +8,6 @@ precision mediump float;
 uniform vec3 u_color1;
 uniform vec3 u_color2;
 
-uniform sampler2D grassMask;
-uniform sampler2D grassDiffuse;
-
 varying vec2 vUv;
 
 varying vec3 v_normal;
@@ -43,10 +40,21 @@ vec3 hsv2rgb(vec3 c) {
 }
 
 void main() {
-	vec2 st = gl_PointCoord;
-	float mixValue = distance(st, vec2(0, 0.5));
-	vec3 maskColor = texture2D(grassMask, vUv).rgb;
-	vec3 diffuseTexture = texture2D(grassDiffuse, vUv).rgb;
+	// vec3 mixed_color = mix(u_color2, u_color1, vUv.y);
+
+	// TODO: fix lighting 
+	// lambert rule, gives cosine of angle between the surface normal and the light direction
+	float diffuse_factor = dot(normalize(v_normal), -directionalLights[0].direction);
+
+	vec3 diffuse_color = directionalLights[0].color;
+	// vec3 diffuse_color = vec3(0.0, 0.0, 0.0);
+
+	if (diffuse_factor > 0.0) {
+		diffuse_color = 
+			diffuse_color * 
+			// intensity *
+			diffuse_factor;
+	}
 
 	vec3 hsv1 = rgb2hsv(u_color1);
 	vec3 hsv2 = rgb2hsv(u_color2);
@@ -56,25 +64,11 @@ void main() {
 	vec3 hsv = vec3(hue, mix(hsv2.yz, hsv1.yz, vUv.y));
 	
 	vec3 mixed_color = hsv2rgb(hsv);
-
-	// vec3 mixed_color = mix(u_color2, u_color1, vUv.y);
-
-	// lambert rule, gives cosine
-	float diffuse_factor = dot(normalize(v_normal), -directionalLights[0].direction);
-	vec3 diffuse_color = directionalLights[0].color;
-
-	if (diffuse_factor > 0.0) {
-		diffuse_color = 
-			diffuse_color * diffuse_factor;
-	}
+	// vec3 mixed_color = mix(diffuse_color, hsv2rgb(hsv), vUv.y);
 
 	gl_FragColor = vec4(
-		// (mixed_color * diffuseTexture) 
-		mixed_color 
+		mixed_color
 		* (ambientLightColor + diffuse_color),
-		1);
-
-	if (maskColor.r <= 0.5) {
-		discard;
-	}
+		// * ambientLightColor,
+		1);		
 }
