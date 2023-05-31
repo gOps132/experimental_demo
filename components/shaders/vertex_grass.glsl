@@ -35,6 +35,9 @@ uniform vec3 u_displacement;
 varying vec2 vUv;
 varying vec3 v_normal;
 
+// float is just for annoying type conversions
+flat varying float instance;
+
 // vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 // vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
 
@@ -81,7 +84,9 @@ vec3 rotate_vertex_position(vec3 position, vec3 axis, float angle){
 void main() {
 	vUv = uv;
 	v_normal = normal;
-	
+	int _instance = gl_InstanceID;
+	instance = float(_instance);
+
 	vec3 finalPosition = position;
 	// finalPosition.x *= 0.7 * cos(uv.x);
 
@@ -92,10 +97,11 @@ void main() {
 	finalPosition.y += 0.5;
 
 	finalPosition.xy *= vec2(u_posy, u_posx);
-	finalPosition.xyz *= abs(terrPosi.y);
+	// finalPosition.xy *= vec2(u_posy, instance + u_posx);
+	// finalPosition.xyz *= abs(terrPosi.y);
 
 	finalPosition += u_displacement;
-	
+
 	if(finalPosition.y > 0.5) {
 		finalPosition.x = ( finalPosition.x + sin( u_time/0.5* ( angle*0.01 ) )  * u_amplitude);
 		finalPosition.z = ( finalPosition.z + cos( u_time/0.5* ( angle*0.01 ) )  * u_amplitude);	
@@ -107,18 +113,6 @@ void main() {
 	finalPosition.xz += terrPosi.xz;
 
 	gl_PointSize = 1000.0;
-
-	// how to make instancing work on individual instances without having attributes or
-	// uniforms
-	// #ifdef USE_INSTANCING
-		// Note that modelViewMatrix is not set when rendering an instanced model,
-		// but can be calculated from viewMatrix * modelMatrix.
-		//
-		// Basic Usage:
-		// attribute mat4 instanceMatrix;
-		// gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4(finalPosition, 1.0);
-	// #endif
-
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
 }
 

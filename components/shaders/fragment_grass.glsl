@@ -13,6 +13,9 @@ varying vec2 vUv;
 varying vec3 v_normal;
 
 uniform vec3 ambientLightColor;
+
+flat varying float instance;
+
 #if NUM_DIR_LIGHTS > 0
 	struct DirectionalLight {
 		vec3 direction;
