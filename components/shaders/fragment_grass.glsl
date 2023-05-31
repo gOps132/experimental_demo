@@ -42,7 +42,8 @@ vec3 hsv2rgb(vec3 c) {
 void main() {
 	// vec3 mixed_color = mix(u_color2, u_color1, vUv.y);
 
-	// TODO: fix lighting 
+	// TODO: fix lighting
+	// transform directional light into local space?
 	// lambert rule, gives cosine of angle between the surface normal and the light direction
 	float diffuse_factor = dot(normalize(v_normal), -directionalLights[0].direction);
 
@@ -59,16 +60,15 @@ void main() {
 	vec3 hsv1 = rgb2hsv(u_color1);
 	vec3 hsv2 = rgb2hsv(u_color2);
 	
-	// mix hue in toward closest direction
 	float hue = (mod(mod((hsv2.x - hsv1.x), 1.) + 1.5, 1.) - 0.5) * vUv.y + hsv1.x;
 	vec3 hsv = vec3(hue, mix(hsv2.yz, hsv1.yz, vUv.y));
-	
-	vec3 mixed_color = hsv2rgb(hsv);
-	// vec3 mixed_color = mix(diffuse_color, hsv2rgb(hsv), vUv.y);
+
+	// color1 -> color2 -> ambient occlusion
+	// vec3 mixed_color = hsv2rgb(hsv);
+	vec3 mixed_color = mix(ambientLightColor, hsv2rgb(hsv), vUv.y);
 
 	gl_FragColor = vec4(
 		mixed_color
-		* (ambientLightColor + diffuse_color),
-		// * ambientLightColor,
+		* diffuse_color,
 		1);		
 }

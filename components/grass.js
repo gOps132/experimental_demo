@@ -6,13 +6,10 @@ import { useLoader, useFrame, extend } from "@react-three/fiber";
 import vertexShader from "./shaders/vertex_grass.glsl";
 import fragmentShader from "./shaders/fragment_grass.glsl";
 
-import simplex from "./shaders/simplex.glsl";
-
 import { TextureLoader } from "three";
 
 import { useControls } from "leva";
-
-THREE.MeshMatcapMaterial;
+import simplex from "perlin-simplex";
 
 function GrassField(props) {
 	const grass_field = useRef();
@@ -58,18 +55,21 @@ function GrassField(props) {
 	});
 
 	const grass_params = useControls("Grass", {
-		color1: {value: '#4b933d', onChange: (i) => {
+		color1: {value: '#413709', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color1.value = new THREE.Color(i);
 		}},
-		color2: {value: '#000000', onChange: (i) => {
+		color2: {value: '#0ac100', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color2.value = new THREE.Color(i);
 		}},
 		posy: {value: 0.5, min: 0.0, max: 10.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_posy.value = i;
 		}},
-		posx: {value: 3.0, min: 0.0, max: 10.0, onChange: (i) => {
+		posx: {value: 3.5, min: 0.0, max: 10.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_posx.value = i;
-		}},	
+		}},
+		amplitude: {value: 0.05, min: 0.00, max: 1.0, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_amplitude.value = i;
+		}},
 		displacement: {value: [0.0,0.0,0.0], step: 0.05, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_displacement.value.x = i[0];
 			grass_particles.current.material.uniforms.u_displacement.value.y = i[1];
@@ -83,6 +83,10 @@ function GrassField(props) {
 			u_displacement: {
 				type: "f",
 				value: new THREE.Vector3(0)
+			},
+			u_amplitude: {
+				type: "f",
+				value: 0.05
 			},
 			u_time : {
 				type: "f",
@@ -121,44 +125,52 @@ function GrassField(props) {
 		// console.log(grass_particles.current.material.uniforms.u_time.value);
 	});
 
-	// grass placement
+	// precalculate grass position and height to a buffer
+	// TODO: calculat density of grass
+	var s = new simplex();
+	let x = 0;
+	let y = 0;
+	let z = 0;
 	for(let i = 0; i < instances; i++) {
-
-		let x;
-		let z;
-
-		// round 
-		if(!props.distribute || props.distribute == "square") {
-			// square
-			x = Math.random() * w - (w/2);
-			z = Math.random() * d - (d/2);
-		} else if (props.distribute == "circle") {
-			// round
-			let r = (w/2) || instances;
-			var a = Math.random(),
-				b = Math.random();
-			if (w/2) {
-				if (b < a) {
-					let c = b;
-					b = a;
-					a = c;
-				}
-			}
-			x = b * r * Math.cos( 2 * Math.PI * a / b );
-			z = b * r * Math.sin( 2 * Math.PI * a / b );
-		}
-
-		// thats it, noise is here
-		let y = h;
+		// for(let p = 0; p < instances / 2; p++) { 
+			// TODO: use simplex or perlain
+			// round 
+			if(!props.distribute || props.distribute == "square") {
+				// square
+				x = Math.random() * w - (w/2);
+				z = Math.random() * d - (d/2);
 				
+				// x += s.noise(i, p);
+				// z += s.noise(i, p);
+			} else if (props.distribute == "circle") {
+				// round
+				let r = (w/2) || instances;
+				var a = Math.random(),
+					b = Math.random();
+				if (w/2) {
+					if (b < a) {
+						let c = b;
+						b = a;
+						a = c;
+					}
+				}
+				x = b * r * Math.cos( 2 * Math.PI * a / b );
+				z = b * r * Math.sin( 2 * Math.PI * a / b );
+			}
 
-		// x = y = z = 0;
-		angles.push( Math.random()*360 );
-		terrain_vertices.push(x,y,z)
+			// thats it, noise is here
+			y = Math.random() * 1.5;
+			// y = s.noise(i, p) * 1.5;
+
+			// x = y = z = 0;
+			angles.push( Math.random()*360 );
+			terrain_vertices.push(x,y,z)
+		// }
 	}
 
 	useEffect(() => {
 		console.log(uniforms);
+		console.log(terrain_vertices.length/3);
 	})
 	return (
 		<>
@@ -177,6 +189,7 @@ function GrassField(props) {
 				<mesh ref={grass_particles}>
 					{/* TODO: draw range of these should be dynamic */}
 					<instancedBufferGeometry
+						isInstancedBufferGeometry
 						// setDrawRange={[
 						// 	0,
 						// 	terrain_vertices.length / 3
@@ -217,7 +230,6 @@ function GrassField(props) {
 					<shaderMaterial
 						uniforms={uniforms}
 						vertexShader={
-							simplex +
 							vertexShader
 						}
 						fragmentShader={
