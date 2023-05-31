@@ -47,35 +47,35 @@ function GrassField(props) {
 	let angles = [];
 
 
-	// const plane_params = useControls("Grass Plane", {
-		// color: {value: '#1d5c11', onChange: (i) => {
-		// 	grass_field.current.material.color.set(i)
-		// }},
-	// });
+	const plane_params = useControls("Grass Plane", {
+		dimensions: {value: [w,d], step: 1.00, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_dimensions.value.x = i[0];
+			grass_particles.current.material.uniforms.u_dimensions.value.y = i[1];
+		}},
+	});
 
 	const grass_params = useControls("Grass", {
+		animation: {value: false, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_animate.value = i;
+		}},
 		color1: {value: '#413709', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color1.value = new THREE.Color(i);
 		}},
 		color2: {value: '#0ac100', onChange: (i) => {
 			grass_particles.current.material.uniforms.u_color2.value = new THREE.Color(i);
 		}},
-		posy: {value: 0.5, min: 0.0, max: 10.0, onChange: (i) => {
+		posy: {value: 1.3, min: 0.0, max: 10.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_posy.value = i;
 		}},
-		posx: {value: 3.5, min: 0.0, max: 10.0, onChange: (i) => {
+		posx: {value: 8.5, min: 0.0, max: 10.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_posx.value = i;
 		}},
-		noise: {value: 0.05, min: 0.00, max: 1.0, onChange: (i) => {
+		noise: {value: 0.30, min: 0.00, max: 1.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_noise.value = i;
 		}},
 		amplitude: {value: 0.05, min: 0.00, max: 1.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_amplitude.value = i;
 		}},
-		dimensions: {value: [w,d], step: 1.00, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_dimensions.value.x = i[0];
-			grass_particles.current.material.uniforms.u_dimensions.value.y = i[1];
-		}},	
 		displacement: {value: [0.0,0.0,0.0], step: 0.05, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_displacement.value.x = i[0];
 			grass_particles.current.material.uniforms.u_displacement.value.y = i[1];
@@ -101,6 +101,10 @@ function GrassField(props) {
 			u_amplitude: {
 				type: "f",
 				value: 0.05
+			},
+			u_animate: {
+				type: "f",
+				value: false
 			},
 			u_time : {
 				type: "f",
@@ -150,9 +154,11 @@ function GrassField(props) {
 					ref={grass_field}
 					rotation={[(Math.PI / 2), 0, 0]}
 				>
-					<planeGeometry args={[w,d]}/> 
+					<planeGeometry 
+						args={[w,d]}
+					/> 
 					<meshBasicMaterial
-						// {...plane_params}
+						{...plane_params}
 						map={dirt_texture}
 						side={THREE.DoubleSide}
 					/>

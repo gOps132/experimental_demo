@@ -32,10 +32,12 @@ uniform float u_posx;
 uniform vec3 u_displacement;
 uniform vec2 u_dimensions;
 uniform float u_noise;
+uniform bool u_animate;
 
 varying vec2 vUv;
 varying vec3 v_normal;
 varying float v_time;
+
 
 // float is just for annoying type conversiodns
 flat varying float v_instance;
@@ -80,11 +82,13 @@ void main() {
 	// variable which iterates over 0->10000 
 
 	float x = width/2.0 - mod(v_instance,width);
-	float y = dimension/2.0 - mod((v_instance / dimension), dimension);
+	float y = dimension/2.0 - mod((v_instance / dimension), width);
 
-	float _noise_cache = snoise(vec2(x,y)*u_noise); //use this
+// TODO: Add noise animation flag or variant, calculate how much noise cache is affected
+// by u_time with a variable ranging 1-0
+	// float _noise_cache = snoise(vec2(x,y)*u_noise); //use this
 	// float _noise_cache = snoise(vec2(x,y)*u_time*0.005);
-	// float _noise_cache = snoise(vec2(x,y)*(cos((u_time)))*u_noise);
+	float _noise_cache = snoise(vec2(x,y) * (u_animate ? ((cos((u_time*0.5)))*u_noise) : u_noise));
 
 	finalPosition.xy *= abs(_noise_cache);
 
