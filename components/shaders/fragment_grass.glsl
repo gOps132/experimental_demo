@@ -7,14 +7,12 @@ precision mediump float;
 
 uniform vec3 u_color1;
 uniform vec3 u_color2;
-
-varying vec2 vUv;
-
-varying vec3 v_normal;
-
 uniform vec3 ambientLightColor;
 
-flat varying float instance;
+uniform float v_time;
+varying vec2 vUv;
+varying vec3 v_normal;
+flat varying float v_instance;
 
 #if NUM_DIR_LIGHTS > 0
 	struct DirectionalLight {
@@ -73,5 +71,5 @@ void main() {
 	gl_FragColor = vec4(
 		mixed_color
 		* diffuse_color,
-		1);		
+		1);
 }

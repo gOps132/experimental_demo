@@ -5,18 +5,18 @@ import { useLoader, useFrame, extend } from "@react-three/fiber";
 
 import vertexShader from "./shaders/vertex_grass.glsl";
 import fragmentShader from "./shaders/fragment_grass.glsl";
+import simplex from "./shaders/simplex.glsl";
 
 import { TextureLoader } from "three";
 
 import { useControls } from "leva";
-import simplex from "perlin-simplex";
 
 function GrassField(props) {
 	const grass_field = useRef();
 	const grass_particles = useRef();
 
-	const grass_texture = useLoader(TextureLoader, "../textures/grass.jpg");
-	const grass_diffuse_texture = useLoader(TextureLoader, "../textures/grass_diffuse.jpg");
+	// const grass_texture = useLoader(TextureLoader, "../textures/grass.jpg");
+	// const grass_diffuse_texture = useLoader(TextureLoader, "../textures/grass_diffuse.jpg");
 	const dirt_texture = useLoader(TextureLoader, "../textures/dirt.jpg");
 	
 	dirt_texture.wrapS = dirt_texture.wrapT = THREE.RepeatWrapping;
@@ -67,22 +67,37 @@ function GrassField(props) {
 		posx: {value: 3.5, min: 0.0, max: 10.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_posx.value = i;
 		}},
+		noise: {value: 0.05, min: 0.00, max: 1.0, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_noise.value = i;
+		}},
 		amplitude: {value: 0.05, min: 0.00, max: 1.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_amplitude.value = i;
 		}},
+		dimensions: {value: [w,d], step: 1.00, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_dimensions.value.x = i[0];
+			grass_particles.current.material.uniforms.u_dimensions.value.y = i[1];
+		}},	
 		displacement: {value: [0.0,0.0,0.0], step: 0.05, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_displacement.value.x = i[0];
 			grass_particles.current.material.uniforms.u_displacement.value.y = i[1];
 			grass_particles.current.material.uniforms.u_displacement.value.z = i[2];
-		}},	
+		}},
 	});
 
 	const uniforms = THREE.UniformsUtils.merge([
 		THREE.UniformsLib[ "lights" ],
 		{
+			u_instances: {
+				type: "f",
+				value: instances
+			},
 			u_displacement: {
 				type: "f",
 				value: new THREE.Vector3(0)
+			},
+			u_dimensions: {
+				type: "f",
+				value: new THREE.Vector2(w,d)
 			},
 			u_amplitude: {
 				type: "f",
@@ -92,6 +107,10 @@ function GrassField(props) {
 				type: "f",
 				value: 0.0
 			},
+			u_noise : {
+				type: "f",
+				value: 0.05
+			},
 			u_posy : {
 				type: "f",
 				value: 1.0
@@ -99,14 +118,6 @@ function GrassField(props) {
 			u_posx : {
 				type: "f",
 				value: 1.0
-			},
-			grassMask: {
-				type: "t",
-				value: grass_texture
-			},
-			grassDiffuse: {
-				type: "t",
-				value: grass_diffuse_texture
 			},
 			u_color1: {
 				type: "i",
@@ -127,7 +138,7 @@ function GrassField(props) {
 
 	// precalculate grass position and height to a buffer
 	// TODO: calculat density of grass
-	var s = new simplex();
+	// var s = new simplex();
 	let x = 0;
 	let y = 0;
 	let z = 0;
@@ -230,6 +241,7 @@ function GrassField(props) {
 					<shaderMaterial
 						uniforms={uniforms}
 						vertexShader={
+							simplex +
 							vertexShader
 						}
 						fragmentShader={

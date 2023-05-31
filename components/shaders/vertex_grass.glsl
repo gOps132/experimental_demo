@@ -31,12 +31,15 @@ uniform float u_amplitude;
 uniform float u_posy;
 uniform float u_posx;
 uniform vec3 u_displacement;
+uniform vec2 u_dimensions;
+uniform float u_noise;
 
 varying vec2 vUv;
 varying vec3 v_normal;
+varying float v_time;
 
-// float is just for annoying type conversions
-flat varying float instance;
+// float is just for annoying type conversiodns
+flat varying float v_instance;
 
 // vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 // vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
@@ -82,13 +85,15 @@ vec3 rotate_vertex_position(vec3 position, vec3 axis, float angle){
 }
 
 void main() {
+	v_time = u_time;
 	vUv = uv;
 	v_normal = normal;
-	int _instance = gl_InstanceID;
-	instance = float(_instance);
+	v_instance = float(gl_InstanceID);
+	
+	float width = float(u_dimensions.x);
+	float dimension = float(u_dimensions.y);
 
 	vec3 finalPosition = position;
-	// finalPosition.x *= 0.7 * cos(uv.x);
 
 	/* TODO:
 		add noise to height of each grass from += -0.5
@@ -100,6 +105,34 @@ void main() {
 	// finalPosition.xy *= vec2(u_posy, instance + u_posx);
 	// finalPosition.xyz *= abs(terrPosi.y);
 
+	// noise function noise(x,y,u_time), use the resolution of the canvas 
+	// or for example 100x100 according to the value of the instance, which is the only
+	// none constant variable, make a mathematical formula for getting x,y coordinates within 
+	// 100x100 according to instance
+	// variable which iterates over 0->10000 
+
+	// x = (w / max instance) * instance
+	// y = (d / max instance) * instance
+
+	// float x = mod(v_instance,100.0);
+	// float y = mod((v_instance / 100.0), 100.0);
+
+	float x = mod(v_instance,width);
+	float y = mod((v_instance / dimension), dimension);
+
+	// float x = mod(v_instance,width);
+	// float y = v_instance / dimension;
+
+	// float _noise_cache = noise(vec3(x,y,u_time));
+	// float _noise_cache = noise(vec3(x,y,0.0));
+	// float _noise_cache = noise(vec3(x,y,0.0));
+
+	// float _noise_cache = snoise(vec2(x,y)*u_noise); //use this
+	float _noise_cache = snoise(vec2(x,y)*u_time*0.005);
+	// float _noise_cache = snoise(vec2(x,y)*(cos((u_time)))*u_noise);
+
+	finalPosition.xy *= _noise_cache;
+
 	finalPosition += u_displacement;
 
 	if(finalPosition.y > 0.5) {
@@ -110,9 +143,30 @@ void main() {
 	vec3 axist = vec3(0.0, 0.5, 0.0);
 	finalPosition = rotate_vertex_position(finalPosition, axist, angle);
 
-	finalPosition.xz += terrPosi.xz;
+	// linear graph
+	// finalPosition.xz += vec2(
+	// 	(abs(_noise_cache) * width)-(width/2.0),
+	// 	(abs(_noise_cache) * dimension)-(dimension/2.0)
+	// );
+
+	// cool function
+	// finalPosition.xz += vec2(
+	// 	(_noise_cache) * x - x/2.0,
+	// 	(_noise_cache) * y - y/2.0
+	// );
+
+	// finalPosition.xz += vec2(
+	// 	((_noise_cache) * -x)+width /2.0,
+	// 	((_noise_cache) * -y) + dimension /2.0
+	// );
+
+	finalPosition.xz += vec2(
+		(_noise_cache+x)-width/2.0,
+		(_noise_cache+y)-dimension/2.0
+	);
+
+	// finalPosition.xz += terrPosi.xz;
 
 	gl_PointSize = 1000.0;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
 }
-
