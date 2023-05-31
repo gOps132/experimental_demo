@@ -24,7 +24,6 @@
 */ 
 
 attribute float angle;
-attribute vec3 terrPosi;
 
 uniform float u_time;
 uniform float u_amplitude;
@@ -40,31 +39,6 @@ varying float v_time;
 
 // float is just for annoying type conversiodns
 flat varying float v_instance;
-
-// vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
-// vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
-
-// float noise(vec3 p){
-// 	vec3 a = floor(p);
-// 	vec3 d = p - a;
-// 	d = d * d * (3.0 - 2.0 * d);
-
-// 	vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
-// 	vec4 k1 = perm(b.xyxy);
-// 	vec4 k2 = perm(k1.xyxy + b.zzww);
-
-// 	vec4 c = k2 + a.zzzz;
-// 	vec4 k3 = perm(c);
-// 	vec4 k4 = perm(c + 1.0);
-
-// 	vec4 o1 = fract(k3 * (1.0 / 41.0));
-// 	vec4 o2 = fract(k4 * (1.0 / 41.0));
-
-// 	vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
-// 	vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
-
-// 	return o4.y * d.y + o4.x * (1.0 - d.y);
-// }
 
 vec4 quat_from_axis_angle(vec3 axis, float angle){ 
 	vec4 qr;
@@ -95,15 +69,9 @@ void main() {
 
 	vec3 finalPosition = position;
 
-	/* TODO:
-		add noise to height of each grass from += -0.5
-		to += 1.5 for more variety
-	*/
 	finalPosition.y += 0.5;
 
 	finalPosition.xy *= vec2(u_posy, u_posx);
-	// finalPosition.xy *= vec2(u_posy, instance + u_posx);
-	// finalPosition.xyz *= abs(terrPosi.y);
 
 	// noise function noise(x,y,u_time), use the resolution of the canvas 
 	// or for example 100x100 according to the value of the instance, which is the only
@@ -111,27 +79,14 @@ void main() {
 	// 100x100 according to instance
 	// variable which iterates over 0->10000 
 
-	// x = (w / max instance) * instance
-	// y = (d / max instance) * instance
+	float x = width/2.0 - mod(v_instance,width);
+	float y = dimension/2.0 - mod((v_instance / dimension), dimension);
 
-	// float x = mod(v_instance,100.0);
-	// float y = mod((v_instance / 100.0), 100.0);
-
-	float x = mod(v_instance,width);
-	float y = mod((v_instance / dimension), dimension);
-
-	// float x = mod(v_instance,width);
-	// float y = v_instance / dimension;
-
-	// float _noise_cache = noise(vec3(x,y,u_time));
-	// float _noise_cache = noise(vec3(x,y,0.0));
-	// float _noise_cache = noise(vec3(x,y,0.0));
-
-	// float _noise_cache = snoise(vec2(x,y)*u_noise); //use this
-	float _noise_cache = snoise(vec2(x,y)*u_time*0.005);
+	float _noise_cache = snoise(vec2(x,y)*u_noise); //use this
+	// float _noise_cache = snoise(vec2(x,y)*u_time*0.005);
 	// float _noise_cache = snoise(vec2(x,y)*(cos((u_time)))*u_noise);
 
-	finalPosition.xy *= _noise_cache;
+	finalPosition.xy *= abs(_noise_cache);
 
 	finalPosition += u_displacement;
 
@@ -155,17 +110,10 @@ void main() {
 	// 	(_noise_cache) * y - y/2.0
 	// );
 
-	// finalPosition.xz += vec2(
-	// 	((_noise_cache) * -x)+width /2.0,
-	// 	((_noise_cache) * -y) + dimension /2.0
-	// );
-
 	finalPosition.xz += vec2(
-		(_noise_cache+x)-width/2.0,
-		(_noise_cache+y)-dimension/2.0
+		(_noise_cache+x),
+		(_noise_cache+y)
 	);
-
-	// finalPosition.xz += terrPosi.xz;
 
 	gl_PointSize = 1000.0;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);

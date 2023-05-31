@@ -47,12 +47,11 @@ function GrassField(props) {
 	let angles = [];
 
 
-	const plane_params = useControls("Grass Plane", {
+	// const plane_params = useControls("Grass Plane", {
 		// color: {value: '#1d5c11', onChange: (i) => {
 		// 	grass_field.current.material.color.set(i)
 		// }},
-		reflectivity: 10.0,
-	});
+	// });
 
 	const grass_params = useControls("Grass", {
 		color1: {value: '#413709', onChange: (i) => {
@@ -136,47 +135,8 @@ function GrassField(props) {
 		// console.log(grass_particles.current.material.uniforms.u_time.value);
 	});
 
-	// precalculate grass position and height to a buffer
-	// TODO: calculat density of grass
-	// var s = new simplex();
-	let x = 0;
-	let y = 0;
-	let z = 0;
 	for(let i = 0; i < instances; i++) {
-		// for(let p = 0; p < instances / 2; p++) { 
-			// TODO: use simplex or perlain
-			// round 
-			if(!props.distribute || props.distribute == "square") {
-				// square
-				x = Math.random() * w - (w/2);
-				z = Math.random() * d - (d/2);
-				
-				// x += s.noise(i, p);
-				// z += s.noise(i, p);
-			} else if (props.distribute == "circle") {
-				// round
-				let r = (w/2) || instances;
-				var a = Math.random(),
-					b = Math.random();
-				if (w/2) {
-					if (b < a) {
-						let c = b;
-						b = a;
-						a = c;
-					}
-				}
-				x = b * r * Math.cos( 2 * Math.PI * a / b );
-				z = b * r * Math.sin( 2 * Math.PI * a / b );
-			}
-
-			// thats it, noise is here
-			y = Math.random() * 1.5;
-			// y = s.noise(i, p) * 1.5;
-
-			// x = y = z = 0;
 			angles.push( Math.random()*360 );
-			terrain_vertices.push(x,y,z)
-		// }
 	}
 
 	useEffect(() => {
@@ -192,7 +152,7 @@ function GrassField(props) {
 				>
 					<planeGeometry args={[w,d]}/> 
 					<meshBasicMaterial
-						{...plane_params}
+						// {...plane_params}
 						map={dirt_texture}
 						side={THREE.DoubleSide}
 					/>
@@ -218,12 +178,6 @@ function GrassField(props) {
 							array={uvs}
 							count={uvs.length / 2}
 							itemSize={2}
-						/>
-						<instancedBufferAttribute
-							attach={"attributes-terrPosi"}
-							array={new Float32Array(terrain_vertices)}
-							count={terrain_vertices.length / 3}
-							itemSize={3}
 						/>
 						<instancedBufferAttribute
 							attach={"attributes-angle"}
