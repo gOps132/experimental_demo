@@ -39,7 +39,7 @@ export default function Home() {
 
 				<GrassField
 					distribute={"square"}
-					instances={10000}
+					instances={100000}
 					width={100}
 					dimension={100}
 					height={0}

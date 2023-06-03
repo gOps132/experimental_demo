@@ -17,11 +17,12 @@ function GrassField(props) {
 
 	// const grass_texture = useLoader(TextureLoader, "../textures/grass.jpg");
 	// const grass_diffuse_texture = useLoader(TextureLoader, "../textures/grass_diffuse.jpg");
-	const dirt_texture = useLoader(TextureLoader, "../textures/dirt.jpg");
+	// const dirt_texture = useLoader(TextureLoader, "../textures/dirt.jpg");
+	const dirt_texture = useLoader(TextureLoader, "../textures/dirt_02.png");
 	
 	dirt_texture.wrapS = dirt_texture.wrapT = THREE.RepeatWrapping;
     dirt_texture.offset.set( 0, 0 );
-    dirt_texture.repeat.set( 20, 20 );
+    dirt_texture.repeat.set( 40, 40 );
 
 	let instances = props.instances ? props.instances : 10000;
 	let w = props.width ? props.width : 20;
@@ -42,10 +43,6 @@ function GrassField(props) {
 	]);
 	// let indices = new Uint16Array([0,1,2,2,3,0]);
 	let indices = new Uint16Array([0,1,2]);
-
-	let terrain_vertices = [];
-	let angles = [];
-
 
 	const plane_params = useControls("Grass Plane", {
 		dimensions: {value: [w,d], step: 1.00, onChange: (i) => {
@@ -73,6 +70,10 @@ function GrassField(props) {
 		noise: {value: 0.30, min: 0.00, max: 1.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_noise.value = i;
 		}},
+		offset: {value: [0.0,0.0], step: 0.05, onChange: (i) => {
+			grass_particles.current.material.uniforms.u_offset.value.x = i[0];
+			grass_particles.current.material.uniforms.u_offset.value.y = i[1];
+		}},
 		amplitude: {value: 0.05, min: 0.00, max: 1.0, onChange: (i) => {
 			grass_particles.current.material.uniforms.u_amplitude.value = i;
 		}},
@@ -86,9 +87,13 @@ function GrassField(props) {
 	const uniforms = THREE.UniformsUtils.merge([
 		THREE.UniformsLib[ "lights" ],
 		{
-			u_instances: {
+			u_instance_count: {
 				type: "f",
 				value: instances
+			},
+			u_offset: {
+				type: "f",
+				value: new THREE.Vector2(0)
 			},
 			u_displacement: {
 				type: "f",
@@ -138,15 +143,16 @@ function GrassField(props) {
 		grass_particles.current.material.uniforms.u_time.value = clock.getElapsedTime();
 		// console.log(grass_particles.current.material.uniforms.u_time.value);
 	});
-
-	for(let i = 0; i < instances; i++) {
-			angles.push( Math.random()*360 );
-	}
+ 
+	// for(let i = 0; i < instances; i++) {
+	// 	console.log(((i / (w * d)) / instances) * 100)
+	// }
 
 	useEffect(() => {
 		console.log(uniforms);
-		console.log(terrain_vertices.length/3);
-	})
+		console.log(instances + " instances");
+	});
+
 	return (
 		<>
 			<group>
@@ -184,12 +190,6 @@ function GrassField(props) {
 							array={uvs}
 							count={uvs.length / 2}
 							itemSize={2}
-						/>
-						<instancedBufferAttribute
-							attach={"attributes-angle"}
-							array={new Float32Array(angles)}
-							count={angles.length}
-							itemSize={1}
 						/>
 						<bufferAttribute
 							attach={"index"}
