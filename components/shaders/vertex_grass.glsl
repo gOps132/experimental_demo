@@ -88,15 +88,21 @@ void main() {
 	// * implement some form of dynamic chunking
 	// 		it would keep the keep the distribution uniform
 
-	// (n/w*d) to
+	// TODO:
+	// Render the grass according to terrain heightmap texture
+
+	// total instance percentage of current instance
 	float a = ((v_instance / (width * dimension)) / u_instance_count) * 100.0;
 	// current position
-	float x = width/2.0 - mod(v_instance,width) + (a * u_offset.x);
-	float y = dimension/2.0 - mod((v_instance / dimension), width) + (a * u_offset.y);
+	float x = width/2.0 - mod(v_instance,width);
+	float y = dimension/2.0 - mod((v_instance / dimension), width);
 	// float y = dimension/2.0 - floor(v_instance / width);
 
 	float noise_cache = snoise(vec2(x,y));
 	float final_noise = snoise(vec2(x,y) * (u_animate ? ((cos((u_time*0.5)))*u_noise) : u_noise));
+
+	// x += noise_cache * u_offset.x;
+	// y += noise_cache * u_offset.y;
 
 	float angle = noise_cache * 360.0;
 
@@ -116,8 +122,8 @@ void main() {
 	//	x = (y * z) / z
 	// y = z/x
 
-	// finalPosition.xy = vec2(u_posx, u_posy);
-	finalPosition.xy *= vec2((1.0/u_posy),u_posx); //works but no noise
+	finalPosition.xy *= vec2(u_posx, u_posy);
+	// finalPosition.xy *= vec2((1.0/u_posy),u_posx); //works but no noise
 	// finalPosition.xy *= vec2((u_posx * abs(noise_cache)),abs(noise_cache)/u_posy);
 
 	finalPosition.yz *= abs(final_noise);

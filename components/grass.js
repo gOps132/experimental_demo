@@ -3,23 +3,25 @@ import * as THREE from "three";
 
 import { useLoader, useFrame, extend } from "@react-three/fiber";
 
-import vertexShader from "./shaders/vertex_grass.glsl";
-import fragmentShader from "./shaders/fragment_grass.glsl";
 import simplex from "./shaders/simplex.glsl";
+
+import grassVertexShader from "./shaders/vertex_grass.glsl";
+import grassFragmentShader from "./shaders/fragment_grass.glsl";
+
+import planeVertexShader from "./shaders/vertex_plane.glsl";
+import planeFragmentShader from "./shaders/fragment_plane.glsl";
 
 import { TextureLoader } from "three";
 
 import { useControls } from "leva";
 
 function GrassField(props) {
-	const grass_field = useRef();
-	const grass_particles = useRef();
+	const plane_ref = useRef();
+	const grass_ref = useRef();
 
-	// const grass_texture = useLoader(TextureLoader, "../textures/grass.jpg");
-	// const grass_diffuse_texture = useLoader(TextureLoader, "../textures/grass_diffuse.jpg");
-	// const dirt_texture = useLoader(TextureLoader, "../textures/dirt.jpg");
 	const dirt_texture = useLoader(TextureLoader, "../textures/dirt_02.png");
-	
+	const height_map = useLoader(TextureLoader, "../textures/height_map_01.png");
+
 	dirt_texture.wrapS = dirt_texture.wrapT = THREE.RepeatWrapping;
     dirt_texture.offset.set( 0, 0 );
     dirt_texture.repeat.set( 40, 40 );
@@ -33,7 +35,6 @@ function GrassField(props) {
 		-0.5, -0.5, 0.0,
 		0.0,  0.5, 0.0,
 		0.5,  -0.5, 0.0,
-		// 1.0, -1.0, 0
 	]);
 	let uvs = new Float32Array([
 		0.0, 0.0,
@@ -41,50 +42,63 @@ function GrassField(props) {
 		1.0, 0.0,
 		1.0, 1.0
 	]);
-	// let indices = new Uint16Array([0,1,2,2,3,0]);
 	let indices = new Uint16Array([0,1,2]);
 
 	const plane_params = useControls("Grass Plane", {
-		dimensions: {value: [w,d], step: 1.00, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_dimensions.value.x = i[0];
-			grass_particles.current.material.uniforms.u_dimensions.value.y = i[1];
+		// dimensions: {value: [w,d], step: 1.00, onChange: (i) => {
+		// 	grass_particles.current.material.uniforms.u_dimensions.value.x = i[0];
+		// 	grass_particles.current.material.uniforms.u_dimensions.value.y = i[1];
+		// }},
+		displacement: {value: 1.0, step: 1.0, onChange: (i) => {
+			plane_ref.current.material.uniforms.u_displacement.value = i;
 		}},
+		
 	});
+
+	const plane_uniforms = {
+		u_displacement : {
+			type: "f",
+			value: 1.0,
+		},
+		u_height_map_texture : {
+			value: height_map
+		}
+	}
 
 	const grass_params = useControls("Grass", {
 		animation: {value: false, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_animate.value = i;
+			grass_ref.current.material.uniforms.u_animate.value = i;
 		}},
 		color1: {value: '#413709', onChange: (i) => {
-			grass_particles.current.material.uniforms.u_color1.value = new THREE.Color(i);
+			grass_ref.current.material.uniforms.u_color1.value = new THREE.Color(i);
 		}},
 		color2: {value: '#0ac100', onChange: (i) => {
-			grass_particles.current.material.uniforms.u_color2.value = new THREE.Color(i);
+			grass_ref.current.material.uniforms.u_color2.value = new THREE.Color(i);
 		}},
-		posy: {value: 1.3, min: 0.0, max: 10.0, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_posy.value = i;
+		posy: {value: 8.0, min: 0.0, step: 0.01, max: 10.0, onChange: (i) => {
+			grass_ref.current.material.uniforms.u_posy.value = i;
 		}},
-		posx: {value: 8.5, min: 0.0, max: 10.0, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_posx.value = i;
+		posx: {value: 0.2, min: 0.0, step: 0.01,max: 10.0, onChange: (i) => {
+			grass_ref.current.material.uniforms.u_posx.value = i;
 		}},
 		noise: {value: 0.30, min: 0.00, max: 1.0, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_noise.value = i;
+			grass_ref.current.material.uniforms.u_noise.value = i;
 		}},
 		offset: {value: [0.0,0.0], step: 0.05, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_offset.value.x = i[0];
-			grass_particles.current.material.uniforms.u_offset.value.y = i[1];
+			grass_ref.current.material.uniforms.u_offset.value.x = i[0];
+			grass_ref.current.material.uniforms.u_offset.value.y = i[1];
 		}},
 		amplitude: {value: 0.05, min: 0.00, max: 1.0, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_amplitude.value = i;
+			grass_ref.current.material.uniforms.u_amplitude.value = i;
 		}},
 		displacement: {value: [0.0,0.0,0.0], step: 0.05, onChange: (i) => {
-			grass_particles.current.material.uniforms.u_displacement.value.x = i[0];
-			grass_particles.current.material.uniforms.u_displacement.value.y = i[1];
-			grass_particles.current.material.uniforms.u_displacement.value.z = i[2];
+			grass_ref.current.material.uniforms.u_displacement.value.x = i[0];
+			grass_ref.current.material.uniforms.u_displacement.value.y = i[1];
+			grass_ref.current.material.uniforms.u_displacement.value.z = i[2];
 		}},
 	});
 
-	const uniforms = THREE.UniformsUtils.merge([
+	const grassUniforms = THREE.UniformsUtils.merge([
 		THREE.UniformsLib[ "lights" ],
 		{
 			u_instance_count: {
@@ -140,16 +154,12 @@ function GrassField(props) {
 	
 	useFrame((state) => {
 		const { clock } = state;
-		grass_particles.current.material.uniforms.u_time.value = clock.getElapsedTime();
+		grass_ref.current.material.uniforms.u_time.value = clock.getElapsedTime();
 		// console.log(grass_particles.current.material.uniforms.u_time.value);
 	});
  
-	// for(let i = 0; i < instances; i++) {
-	// 	console.log(((i / (w * d)) / instances) * 100)
-	// }
-
 	useEffect(() => {
-		console.log(uniforms);
+		console.log(grassUniforms);
 		console.log(instances + " instances");
 	});
 
@@ -157,19 +167,23 @@ function GrassField(props) {
 		<>
 			<group>
 				<mesh
-					ref={grass_field}
+					ref={plane_ref}
 					rotation={[(Math.PI / 2), 0, 0]}
 				>
-					<planeGeometry 
-						args={[w,d]}
-					/> 
-					<meshBasicMaterial
+					<planeGeometry args={[w,d,w,d]}/>
+					{/* <meshBasicMaterial
 						{...plane_params}
 						map={dirt_texture}
 						side={THREE.DoubleSide}
+					/> */}
+					<shaderMaterial
+						uniforms={plane_uniforms}
+						vertexShader={planeVertexShader}
+						fragmentShader={planeFragmentShader}
+						side={THREE.DoubleSide}
 					/>
 				</mesh>
-				<mesh ref={grass_particles}>
+				<mesh ref={grass_ref}>
 					{/* TODO: draw range of these should be dynamic */}
 					<instancedBufferGeometry
 						isInstancedBufferGeometry
@@ -199,13 +213,13 @@ function GrassField(props) {
 						/>
 					</instancedBufferGeometry>
 					<shaderMaterial
-						uniforms={uniforms}
+						uniforms={grassUniforms}
 						vertexShader={
 							simplex +
-							vertexShader
+							grassVertexShader
 						}
 						fragmentShader={
-							fragmentShader
+							grassFragmentShader
 						}
 						lights={true}
 						side={THREE.DoubleSide}
