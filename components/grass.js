@@ -24,7 +24,8 @@ function GrassField(props) {
 
 	dirt_texture.wrapS = dirt_texture.wrapT = THREE.RepeatWrapping;
     dirt_texture.offset.set( 0, 0 );
-    dirt_texture.repeat.set( 40, 40 );
+    dirt_texture.repeat.set( 40, 40 )
+	
 
 	let instances = props.instances ? props.instances : 10000;
 	let w = props.width ? props.width : 20;
@@ -51,21 +52,28 @@ function GrassField(props) {
 		// }},
 		displacement: {value: 1.0, step: 1.0, onChange: (i) => {
 			plane_ref.current.material.uniforms.u_displacement.value = i;
+			grass_ref.current.material.uniforms.u_displacement.value = i;
 		}},
-		
 	});
 
-	const plane_uniforms = {
-		u_displacement : {
-			type: "f",
-			value: 1.0,
-		},
-		u_height_map_texture : {
-			value: height_map
-		}
-	}
+	const plane_uniforms =  THREE.UniformsUtils.merge([
+		THREE.UniformsLib['lights'], {
+			u_displacement : {
+				type: "f",
+				value: 1.0,
+			},
+			u_height_map_texture : {
+				value: height_map
+			},
+			u_dirt_texture : {
+				value: dirt_texture
+			}
+	}]);
 
 	const grass_params = useControls("Grass", {
+		u_param : {value: 300.0, step: 10.0, onChange: (i) => {
+			grass_ref.current.material.uniforms.u_param.value = i;
+		}},
 		animation: {value: false, onChange: (i) => {
 			grass_ref.current.material.uniforms.u_animate.value = i;
 		}},
@@ -75,10 +83,10 @@ function GrassField(props) {
 		color2: {value: '#0ac100', onChange: (i) => {
 			grass_ref.current.material.uniforms.u_color2.value = new THREE.Color(i);
 		}},
-		posy: {value: 8.0, min: 0.0, step: 0.01, max: 10.0, onChange: (i) => {
+		posy: {value: 5.68, min: 0.0, step: 0.01, max: 10.0, onChange: (i) => {
 			grass_ref.current.material.uniforms.u_posy.value = i;
 		}},
-		posx: {value: 0.2, min: 0.0, step: 0.01,max: 10.0, onChange: (i) => {
+		posx: {value: 2.57, min: 0.0, step: 0.01,max: 10.0, onChange: (i) => {
 			grass_ref.current.material.uniforms.u_posx.value = i;
 		}},
 		noise: {value: 0.30, min: 0.00, max: 1.0, onChange: (i) => {
@@ -92,15 +100,25 @@ function GrassField(props) {
 			grass_ref.current.material.uniforms.u_amplitude.value = i;
 		}},
 		displacement: {value: [0.0,0.0,0.0], step: 0.05, onChange: (i) => {
-			grass_ref.current.material.uniforms.u_displacement.value.x = i[0];
-			grass_ref.current.material.uniforms.u_displacement.value.y = i[1];
-			grass_ref.current.material.uniforms.u_displacement.value.z = i[2];
+			grass_ref.current.material.uniforms.u_vertex_displacement.value.x = i[0];
+			grass_ref.current.material.uniforms.u_vertex_displacement.value.y = i[1];
+			grass_ref.current.material.uniforms.u_vertex_displacement.value.z = i[2];
 		}},
 	});
 
 	const grassUniforms = THREE.UniformsUtils.merge([
-		THREE.UniformsLib[ "lights" ],
-		{
+		THREE.UniformsLib[ "lights" ], {
+			u_height_map_texture : {
+				value: height_map
+			},
+			u_displacement : {
+				type: "f",
+				value: 1.0,
+			},
+			u_param: {
+				type: "f",
+				value: 300.0,
+			},
 			u_instance_count: {
 				type: "f",
 				value: instances
@@ -109,7 +127,7 @@ function GrassField(props) {
 				type: "f",
 				value: new THREE.Vector2(0)
 			},
-			u_displacement: {
+			u_vertex_displacement: {
 				type: "f",
 				value: new THREE.Vector3(0)
 			},
@@ -159,8 +177,9 @@ function GrassField(props) {
 	});
  
 	useEffect(() => {
-		console.log(grassUniforms);
+		console.log(plane_uniforms);
 		console.log(instances + " instances");
+		console.log(height_map.source.data.width, height_map.source.data.height);
 	});
 
 	return (

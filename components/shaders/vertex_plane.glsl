@@ -29,12 +29,14 @@ uniform sampler2D u_height_map_texture;
 uniform float u_displacement;
 
 varying vec2 vUv; 
+varying vec3 vNormal;
 
 void main() {
     vUv = uv;
+    vNormal = normal;
 
     vec4 deform = texture2D(u_height_map_texture, uv);
-    vec3 displacement = deform.rgb * u_displacement;
+    float displacement = deform.r * u_displacement;
 
     vec3 newPosition = position + normal * -displacement;
 

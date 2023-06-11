@@ -9,6 +9,7 @@ uniform vec3 u_color1;
 uniform vec3 u_color2;
 uniform vec3 ambientLightColor;
 
+varying vec3 v_uv_texture_debug;
 uniform float v_time;
 varying vec2 vUv;
 varying vec3 v_normal;

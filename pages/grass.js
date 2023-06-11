@@ -35,20 +35,16 @@ export default function Home() {
 				/>
 				<axesHelper/>
 
+				<LightExample/>
 				<Model scale={0.05} />
-
 				<GrassField
 					distribute={"square"}
-					instances={100000}
-					width={100}
-					dimension={100}
+					instances={300 * 300}
+					width={300}
+					dimension={300}
 					height={0}
 				/>
-
-				<LightExample/>
-
 				{/* add drei grid here as well */}
-
 				<GizmoHelper alignment="bottom-right" margin={[80, 80]}>
 				<GizmoViewport axisColors={['#9d4b4b', '#2f7f4f', '#3b5b9d']} labelColor="white" />
 			</GizmoHelper>
