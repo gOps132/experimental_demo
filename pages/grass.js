@@ -38,11 +38,8 @@ export default function Home() {
 				<LightExample/>
 				<Model scale={0.05} />
 				<GrassField
-					distribute={"square"}
-					instances={300 * 300}
 					width={300}
 					dimension={300}
-					height={0}
 				/>
 				{/* add drei grid here as well */}
 				<GizmoHelper alignment="bottom-right" margin={[80, 80]}>

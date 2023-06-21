@@ -27,11 +27,11 @@ function GrassField(props) {
     dirt_texture.repeat.set( 40, 40 )
 	
 
-	let instances = props.instances ? props.instances : 10000;
 	let w = props.width ? props.width : 20;
 	let d = props.dimension ? props.dimension : 20;
-	let h = props.height ?  props.height : 0;
+	let instances = (w * d);
 
+	// simple triangle
 	let vertices = new Float32Array([
 		-0.5, -0.5, 0.0,
 		0.0,  0.5, 0.0,
@@ -47,8 +47,8 @@ function GrassField(props) {
 
 	const plane_params = useControls("Grass Plane", {
 		// dimensions: {value: [w,d], step: 1.00, onChange: (i) => {
-		// 	grass_particles.current.material.uniforms.u_dimensions.value.x = i[0];
-		// 	grass_particles.current.material.uniforms.u_dimensions.value.y = i[1];
+		// 	grass_ref.current.material.uniforms.u_dimensions.value.x = i[0];
+		// 	grass_ref.current.material.uniforms.u_dimensions.value.y = i[1];
 		// }},
 		displacement: {value: 1.0, step: 1.0, onChange: (i) => {
 			plane_ref.current.material.uniforms.u_displacement.value = i;
@@ -169,7 +169,7 @@ function GrassField(props) {
 			},
 		}
 	]);
-	
+
 	useFrame((state) => {
 		const { clock } = state;
 		grass_ref.current.material.uniforms.u_time.value = clock.getElapsedTime();
@@ -190,11 +190,6 @@ function GrassField(props) {
 					rotation={[(Math.PI / 2), 0, 0]}
 				>
 					<planeGeometry args={[w,d,w,d]}/>
-					{/* <meshBasicMaterial
-						{...plane_params}
-						map={dirt_texture}
-						side={THREE.DoubleSide}
-					/> */}
 					<shaderMaterial
 						uniforms={plane_uniforms}
 						vertexShader={planeVertexShader}
@@ -203,13 +198,8 @@ function GrassField(props) {
 					/>
 				</mesh>
 				<mesh ref={grass_ref}>
-					{/* TODO: draw range of these should be dynamic */}
 					<instancedBufferGeometry
 						isInstancedBufferGeometry
-						// setDrawRange={[
-						// 	0,
-						// 	terrain_vertices.length / 3
-						// ]} 
 						instanceCount={instances}
 					>
 						<bufferAttribute
