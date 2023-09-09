@@ -29,6 +29,9 @@ function GrassField(props) {
 
 	let w = props.width ? props.width : 20;
 	let d = props.dimension ? props.dimension : 20;
+	 
+	// TODO: add a density slider to calculate the density of each "chunk"
+	// 
 	let instances = (w * d);
 
 	// simple triangle
@@ -83,18 +86,14 @@ function GrassField(props) {
 		color2: {value: '#0ac100', onChange: (i) => {
 			grass_ref.current.material.uniforms.u_color2.value = new THREE.Color(i);
 		}},
-		posy: {value: 5.68, min: 0.0, step: 0.01, max: 10.0, onChange: (i) => {
+		posy: {value: 10.0, min: 0.0, step: 0.01, max: 10.0, onChange: (i) => {
 			grass_ref.current.material.uniforms.u_posy.value = i;
 		}},
-		posx: {value: 2.57, min: 0.0, step: 0.01,max: 10.0, onChange: (i) => {
+		posx: {value: 0.25, min: 0.0, step: 0.01,max: 10.0, onChange: (i) => {
 			grass_ref.current.material.uniforms.u_posx.value = i;
 		}},
 		noise: {value: 0.30, min: 0.00, max: 1.0, onChange: (i) => {
 			grass_ref.current.material.uniforms.u_noise.value = i;
-		}},
-		offset: {value: [0.0,0.0], step: 0.05, onChange: (i) => {
-			grass_ref.current.material.uniforms.u_offset.value.x = i[0];
-			grass_ref.current.material.uniforms.u_offset.value.y = i[1];
 		}},
 		amplitude: {value: 0.05, min: 0.00, max: 1.0, onChange: (i) => {
 			grass_ref.current.material.uniforms.u_amplitude.value = i;
@@ -119,13 +118,9 @@ function GrassField(props) {
 				type: "f",
 				value: 300.0,
 			},
-			u_instance_count: {
+			u_instance_count: { 	
 				type: "f",
 				value: instances
-			},
-			u_offset: {
-				type: "f",
-				value: new THREE.Vector2(0)
 			},
 			u_vertex_displacement: {
 				type: "f",

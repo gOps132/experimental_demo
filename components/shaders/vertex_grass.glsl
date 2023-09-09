@@ -29,7 +29,6 @@ uniform float u_displacement;
 uniform float u_param;
 
 uniform float u_instance_count;
-uniform vec2 u_offset;
 uniform float u_time;
 uniform float u_amplitude;
 uniform float u_posy;
@@ -66,6 +65,7 @@ vec3 rotate_vertex_position(vec3 position, vec3 axis, float angle){
 
 }
 
+// TODO: flow control implementation to see wether a single blade of grass gets rendered or not
 void main() {
 	v_time = u_time;
 	vUv = uv;
@@ -104,11 +104,6 @@ void main() {
 	float x = mod(v_instance,width);
 	float y = mod((v_instance / dimension), width);
 
-	// float x = mod(v_instance,width);
-	// float y =  mod((v_instance / dimension), width);
-
-	// float y = dimension/2.0 - floor(v_instance / width);
-
 	float noise_cache = snoise(vec2(x,y));
 	float final_noise = snoise(vec2(x,y) * (u_animate ? ((cos((u_time*0.5)))*u_noise) : u_noise));
 
@@ -125,6 +120,8 @@ void main() {
 
 	finalPosition.y += 0.5;
 
+	finalPosition.y += finalPosition.y * noise_cache;
+ 
 	// TODO:
 	// the smaller the blade, the thinner it looks
 	// so height is directly proportional to width
@@ -136,10 +133,6 @@ void main() {
 	// y = z/x
 
 	finalPosition.xy *= vec2(u_posx, u_posy);
-	// finalPosition.xy *= vec2(u_posx, u_posy) * abs(noise_cache);
-	// finalPosition.xy *= vec2((1.0/u_posx),u_posy) * abs(noise_cache); //works but no noise
-	// finalPosition.xy *= vec2((u_posx * abs(noise_cache)),abs(noise_cache)/u_posy);
-	// finalPosition.yz *= abs(final_noise);
 
 	// grass sway
 	if(finalPosition.y > 0.5) {
@@ -150,33 +143,8 @@ void main() {
 	vec3 axist = vec3(0.0, 0.5, 0.0); // grass rotation
 	finalPosition = rotate_vertex_position(finalPosition, axist, angle);
 
-	// converting the worldspace coordinates of the grass to uv coordinates
-
-	// vec2 tuv = (finalPosition.xy/finalPosition.z);
-	// vec4 texture_heightmap = texture2D(u_height_map_texture, tuv);
-	// vec3 deform = texture_heightmap.rgb * finalPosition.z; // unprojected heightmap into worldspace
-	// vec2 tex_coord = vec2(uv.x, uv.y);
-	// vec4 deform = texture2D(u_height_map_texture, tex_coord);
-    // vec3 displacement = deform.rgb * u_displacement;
-    // finalPosition.y += abs((texture_heightmap.rgb * u_displacement).y);
-    // finalPosition.y += (deform.rgb * u_displacement).y;
-	// finalPosition = finalPosition + normal * displacement;
-
-	// height map scale 
-	// vSamplePos = bladePos.xy * heightMapScale.xy + vec2(0.5, 0.5);
-	// vec2 sample_pos = vec2(x,y) *  
-
-	// vec2 tuv = uv;
-	// vec2 tuv = vec2(finalPosition.x/u_param,finalPosition.y/u_param);
-	// vec2 tuv = vec2(x/u_param,y/u_param) * vec2(1081, 1081);
-
 	vec2 tuv = vec2(x/u_param,y/u_param);
 	
-	// tuv = tuv * (1.0/1081.0);	
-	// tuv /= 300.0 * (1.0/1081.0);
-	// tuv.x = 1.0 - tuv.x;
-	// tuv.y = 1.0 - tuv.y;
-	// vec2 tuv = vec2(x,y) / vec2(u_param,u_param);
 	vec4 texture_heightmap = texture2D(u_height_map_texture, tuv.xy);
 	float displacement = texture_heightmap.r;
 	float height = displacement * u_displacement;
@@ -190,6 +158,11 @@ void main() {
 		final_noise + (x - width/2.0),
 		final_noise + (y - dimension/2.0)
 	);
+
+	// finalPosition.xz += vec2(
+	// 	(x - width/2.0),
+	// 	(y - dimension/2.0)
+	// );
 
 	gl_PointSize = 1000.0;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
