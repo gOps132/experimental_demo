@@ -14,6 +14,7 @@ import planeFragmentShader from "./shaders/fragment_plane.glsl";
 import { TextureLoader } from "three";
 
 import { useControls } from "leva";
+import { ComputedAttribute } from "@react-three/drei";
 
 function GrassField(props) {
 	const plane_ref = useRef();
@@ -45,6 +46,12 @@ function GrassField(props) {
 		1.0, 1.0,
 		1.0, 0.0,
 		1.0, 1.0
+	]);
+	const normals = new Float32Array([
+		0, 0, 1,
+		0, 0, 1,
+		0, 0, 1,
+		0, 0, 1,
 	]);
 	let indices = new Uint16Array([0,1,2]);
 
@@ -208,6 +215,12 @@ function GrassField(props) {
 							array={uvs}
 							count={uvs.length / 2}
 							itemSize={2}
+						/>
+						<bufferAttribute
+							attach='attributes-normal'
+							array={normals}
+							count={normals.length / 3}
+							itemSize={3}
 						/>
 						<bufferAttribute
 							attach={"index"}

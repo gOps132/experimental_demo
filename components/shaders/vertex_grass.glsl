@@ -42,10 +42,24 @@ varying vec2 vUv;
 varying vec3 v_normal;
 varying float v_time;
 
+varying float v_directional_light_intensity;
+varying vec3 v_directional_light_color;
+
 varying vec3 v_uv_texture_debug;
 
 // float is just for annoying type conversiodns
 flat varying float v_instance;
+
+// the direction of the light is specified in worldspace
+// therefore, to properly computer the lighting, we required the normals
+// to be transformed from model space to world space
+#if NUM_DIR_LIGHTS > 0
+	struct DirectionalLight {
+		vec3 direction;
+		vec3 color;
+	};
+	uniform DirectionalLight directionalLights[ NUM_DIR_LIGHTS ];
+#endif
 
 vec4 quat_from_axis_angle(vec3 axis, float angle){ 
 	vec4 qr;
@@ -77,6 +91,11 @@ void main() {
 
 	vec3 finalPosition = position;
 
+	float intensity = dot(normal, directionalLights[0].direction);
+	// TODO: max function isn't available, what version am i using?
+	v_directional_light_intensity = (intensity > 0.0) ? intensity : 0.0;
+	v_directional_light_color = directionalLights[0].color;
+
 	// noise function noise(x,y,u_time), use the resolution of the canvas 
 	// or for example 100x100 according to the value of the instance, which is the only
 	// none constant variable, make a mathematical formula for getting x,y coordinates within 
@@ -107,31 +126,10 @@ void main() {
 	float noise_cache = snoise(vec2(x,y));
 	float final_noise = snoise(vec2(x,y) * (u_animate ? ((cos((u_time*0.5)))*u_noise) : u_noise));
 
-	// x *= noise_cache;
-	// y *= noise_cache;
-
 	float angle = noise_cache * 360.0;
-
-	// assign positions
-	// ===========================================
-	// finalPosition.xz = vec2(x, y - float(dimension) * 0.5) * (1.0f / float(1));
-	// finalPosition.x += snoise(vec2(x,y) * 3.0) * 0.2;
-	// finalPosition.y += snoise(vec2(x, finalPosition.z) * 4.0) * 0.2;
-
 	finalPosition.y += 0.5;
 
 	finalPosition.y += finalPosition.y * noise_cache;
- 
-	// TODO:
-	// the smaller the blade, the thinner it looks
-	// so height is directly proportional to width
-	// the lower the posx the thinner
-	// the higher the posy the higher 
-	// x = 1/y
-	// the noise should not be independent from the value of x and y
-	//	x = (y * z) / z
-	// y = z/x
-
 	finalPosition.xy *= vec2(u_posx, u_posy);
 
 	// grass sway
@@ -144,7 +142,7 @@ void main() {
 	finalPosition = rotate_vertex_position(finalPosition, axist, angle);
 
 	vec2 tuv = vec2(x/u_param,y/u_param);
-	
+
 	vec4 texture_heightmap = texture2D(u_height_map_texture, tuv.xy);
 	float displacement = texture_heightmap.r;
 	float height = displacement * u_displacement;
@@ -158,11 +156,6 @@ void main() {
 		final_noise + (x - width/2.0),
 		final_noise + (y - dimension/2.0)
 	);
-
-	// finalPosition.xz += vec2(
-	// 	(x - width/2.0),
-	// 	(y - dimension/2.0)
-	// );
 
 	gl_PointSize = 1000.0;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);

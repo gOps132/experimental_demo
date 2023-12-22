@@ -15,14 +15,8 @@ varying vec2 vUv;
 varying vec3 v_normal;
 flat varying float v_instance;
 
-#if NUM_DIR_LIGHTS > 0
-	struct DirectionalLight {
-		vec3 direction;
-		vec3 color;
-	};
-
-	uniform DirectionalLight directionalLights[ NUM_DIR_LIGHTS ];
-#endif
+varying float v_directional_light_intensity;
+varying vec3 v_directional_light_color;
 
 vec3 rgb2hsv(vec3 c) {
 	vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -45,23 +39,12 @@ void main() {
 	// vec3 mixed_color = mix(u_color2, u_color1, vUv.y);
 
 	// TODO: fix lighting
-	// transform directional light into local space?
 	// lambert rule, gives cosine of angle between the surface normal and the light direction
-	float diffuse_factor = dot(normalize(v_normal), -directionalLights[0].direction);
-
-	vec3 diffuse_color = directionalLights[0].color;
-	// vec3 diffuse_color = vec3(0.0, 0.0, 0.0);
-
-	if (diffuse_factor > 0.0) {
-		diffuse_color = 
-			diffuse_color * 
-			// intensity *
-			diffuse_factor;
-	}
-
+	// float diffuse_factor = dot(normalize(v_normal), -directionalLights[0].direction);
+	vec3 diffuse_color =  v_directional_light_color * v_directional_light_intensity;
 	vec3 hsv1 = rgb2hsv(u_color1);
 	vec3 hsv2 = rgb2hsv(u_color2);
-	
+
 	float hue = (mod(mod((hsv2.x - hsv1.x), 1.) + 1.5, 1.) - 0.5) * vUv.y + hsv1.x;
 	vec3 hsv = vec3(hue, mix(hsv2.yz, hsv1.yz, vUv.y));
 
@@ -71,6 +54,6 @@ void main() {
 
 	gl_FragColor = vec4(
 		mixed_color
-		* diffuse_color,
+		+ diffuse_color,
 		1);
 }
