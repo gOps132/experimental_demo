@@ -54,6 +54,6 @@ void main() {
 
 	gl_FragColor = vec4(
 		mixed_color
-		+ diffuse_color,
+		* diffuse_color,
 		1);
 }

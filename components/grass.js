@@ -14,7 +14,6 @@ import planeFragmentShader from "./shaders/fragment_plane.glsl";
 import { TextureLoader } from "three";
 
 import { useControls } from "leva";
-import { ComputedAttribute } from "@react-three/drei";
 
 function GrassField(props) {
 	const plane_ref = useRef();
@@ -48,7 +47,6 @@ function GrassField(props) {
 		1.0, 1.0
 	]);
 	const normals = new Float32Array([
-		0, 0, 1,
 		0, 0, 1,
 		0, 0, 1,
 		0, 0, 1,
